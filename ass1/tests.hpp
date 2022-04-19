@@ -115,15 +115,18 @@ public:
     {
         for(int test_counter = 0; test_counter < 3; ++test_counter)
         {
+            cout << "\n\ntest count " << test_counter << endl;
             const unsigned s1 = 1 + (rand() % 20);
             const unsigned s2 = 1 + (rand() % 20);
             std::vector<int> v1(s1);
             std::vector<int> v2(s2);
+            // cout << "passed 123";
             std::generate(v1.begin(),v1.end(),[](){return rand() % 100;});
             std::generate(v2.begin(),v2.end(),[](){return rand() % 100;});
             std::sort(v1.rbegin(), v1.rend());
             std::sort(v2.rbegin(), v2.rend());
             Forward_list<int> my_list1;
+            // cout << "passed 128";
             std::forward_list<int> real_list1;
             for(int x : v1)
             {
@@ -137,13 +140,16 @@ public:
                 my_list2.push_front(x);
                 real_list2.push_front(x);
             }
+            // cout << "passed 142";
             my_list1.merge(my_list2);
             real_list1.merge(real_list2);
             // asserting merge!
             cout << "\n Asserting merge " << endl;
+            cout << "merged list: "; my_list1.display();
+            cout << "merged list size: "<< my_list1.size() << endl;
             for(unsigned i = 0; i < s1 + s2; ++i)
             {
-                cout << "Checking " << my_list1.front() << " == " << real_list1.front() << endl;
+                // cout << "Checking " << my_list1.front() << " == " << real_list1.front() << endl;
                 assert(my_list1.front() == real_list1.front());
                 my_list1.pop_front();
                 real_list1.pop_front();

@@ -119,6 +119,8 @@ private:
 
     void swap_pointers(Node &a, Node &b);
 
+    void displayNode(Node* n);
+
 };
 
 // Default Constructor
@@ -244,6 +246,7 @@ void Forward_list<T>::pop_front()
         Node* tmp = this->head_;
         // Update the head
         this->head_ = this->head_->next;
+        // displayNode(tmp);
         delete tmp;
         this->size_--;
     }
@@ -362,6 +365,19 @@ void Forward_list<T>::swap_pointers(Node &a, Node &b)
     b = c;
 }
 
+// // Make the order a -> b -> c
+// function set_node_order(Node* &a, Node* &b, Node* &c)
+// {
+//     // 
+//     a->next = b;
+//     b->next = c;
+// }
+template <typename T>
+void Forward_list<T>::displayNode(Node* n)
+{
+    cout << "data: " << n->data << " adress: " << n << " n->next: " << n->next << endl;
+}
+
 // Merging two sorted lists
 // For this function it is assumed that both *this and the 
 // input Forward_list other are already sorted
@@ -375,66 +391,95 @@ void Forward_list<T>::swap_pointers(Node &a, Node &b)
 template <typename T>
 void Forward_list<T>::merge(Forward_list& other)
 {
-    Node* this_node = this->head_;
-    Node* other_node = other.head_;
-    Node* this_prev = this->head_;
 
-    cout << "This : "; this->display();
-    cout << "Other : "; other.display();
+    cout << "this  list pre merge: ";
+    this->display();
+    cout << "other list pre merge: ";
+    other.display();
 
-    // Overwrite this head
-    if (other_node->data < this_node->data)
+    Node* n_other = other.head_;
+    Node* n_this = this->head_;
+    Node* n_merged = nullptr;
+
+    //todo robust against nullptr
+    if (n_this == nullptr)
     {
-        cout << "overwrite head:: this: " << this_node->data << " other: " << other_node->data << endl;
-        cout << "this_node  " << this_node << "   this_node->next  " << this_node->next << endl;
-        this->head_ = other_node;
-        this_prev = other_node;
-        other_node = other_node->next;
-        cout << "head overwrite" << endl;
+        this->head_ = other.head_;
+        this->size_ = other.size_;    
+        other.head_ = nullptr;
+        other.size_ = 0;
+        return;
     }
-
-    for (int i =0; i < 50; i++)
+    if (n_other == nullptr)
+        return;
+    if (n_this->data > n_other->data)
     {
-        // check exit conditions ie any == nullptr
-        if (other_node == nullptr && this_node != nullptr)
-        {
-            this_prev->next = this_node;
-            this_prev = this_node;
-            this_node = this_node->next;
-            cout << "other finished" << endl;
-        }
-        else if (other_node != nullptr && this_node == nullptr)
-        {
-            this_prev->next = other_node;
-            this_prev = other_node;
-            other_node = other_node->next;
-            cout << "other finished" << endl;
-        }
-        else if (other_node != nullptr && this_node != nullptr)
-            if (other_node->data < this_node->data )
-            {
-                // Swap the values
-                cout << "swap:: this: " << this_node->data << " other: " << other_node->data << endl;
-                cout << "this_node  " << this_node << "   this_node->next  " << this_node->next << endl;
-                this_prev->next = other_node;
-                this_prev = this_prev->next;
-                other_node = other_node->next;
-            }
-            else
-            {
-                // Iterate this
-                cout << "no swap:: this: " << this_node->data << " other: " << other_node->data << endl;
-                cout << "this_node  " << this_node << "   this_node->next  " << this_node->next << endl;
-                this_prev->next = this_node;
-                this_prev = this_prev->next;
-                this_node = this_node->next;
+        n_merged = n_other; 
+        n_other = n_other->next;
+        this->size_++;
 
-            }
-        else // both null! finished iterating
+    }
+    else
+    {
+        n_merged = n_this;
+        n_this = n_this->next;
+
+    }
+    
+    this->head_ = n_merged;
+
+    // Now traverse
+    while(1)
+    // for (int i=0; i<50; i++)
+    {
+        // cout<< "n_this   -- "; displayNode(n_this);
+        // cout<< "n_other  -- "; displayNode(n_other);
+        // cout<< "n_merged -- "; displayNode(n_merged);
+        // cout << endl;
+        // If this list is depleted
+        if (n_this == nullptr && n_other != nullptr)
         {
+            n_merged->next = n_other;
+            // Advance n_other
+            n_other = n_other->next;
+            this->size_++;
+        }
+        // If other list is depleted
+        else if (n_this != nullptr && n_other == nullptr)
+        {
+            n_merged->next = n_this;
+            // Advance n_this
+            n_this = n_this->next;
+        }
+        // If neither is depleted, compare and choose the next value
+        else if (n_this != nullptr && n_other != nullptr)
+        {
+            if (n_other->data < n_this->data)
+            {
+                n_merged->next = n_other;
+                // Now advance other list
+                n_other = n_other->next;
+                this->size_++;
+            }
+            else // n_other->data > n_this->data
+            {
+                n_merged->next = n_this;
+                // Now advance this list
+                n_this = n_this->next;
+            }
+            
+        }
+        else // both lists are finished
             break;
-        }
+        
+        // Always advance n_merged
+        n_merged = n_merged->next;
     }
+
+    // Kill the other list
+    other.head_ = nullptr;
+    other.size_ = 0;
+
 }   
 
 // recursive implementation of merge_sort
