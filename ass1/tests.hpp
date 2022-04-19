@@ -211,6 +211,8 @@ public:
             // cout << "\nlist size: " << my_list.size() << endl;
             // cout << "Displaying my_list post split: ";
             // my_list.display();
+            // cout << "Displaying second list post split: ";
+            // second.display();
             assert(my_list.size() == middle);
             for(auto it = v1.begin(); it != v1.begin()+middle;++it)
             {
@@ -226,8 +228,7 @@ public:
                 assert(*it == second.front());
                 second.pop_front();
             }
-            // cout << "Displaying second list : ";
-            // second.display();
+
             // cout << "Calling second.empty(): " << second.empty() << endl;
             assert(second.empty());
         }

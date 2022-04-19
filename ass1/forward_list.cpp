@@ -33,18 +33,18 @@ int main()
     tester.test_initializer_list_str();
 
     // test_merge requires push_front, front, pop_front and merge
-    tester.test_merge();
+    // tester.test_merge();
 
     // same as test_merge
-    tester.test_merge_edge_cases();
+    // tester.test_merge_edge_cases();
 
     // test_split requires push_front, front, pop_front, copy constructor and split
     tester.test_split();
 
     // test_split_and_merge requires push_front, front, pop_front, copy constructor, merge and split
-    tester.test_split_and_merge();
+    // tester.test_split_and_merge();
 
     // test_sort requires push_front, front, pop_front, copy constructor, merge and split
-    tester.test_sort();
+    // tester.test_sort();
     return 0;
 }

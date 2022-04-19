@@ -156,19 +156,30 @@ Forward_list<T>::~Forward_list()
 template <typename T>
 Forward_list<T>::Forward_list(const Forward_list& other)
 {
+    if (other.head_ == nullptr)
+        return;
+    
+    // Create the first node with the head data of other
+    Node* n_this = new Node(other.head_->data, nullptr);
+    // Set this node as the head of self
+    this->head_ = n_this;
+    this->size_++;
+    // Create a node for traversing other
+    Node* n_oth = other.head_;
 
-    Node* tmp = other.head_;
-    std::vector<T> other_values;
-    while (tmp != nullptr)
+    // Once the next node is blank, stop creating new nodes
+    while(n_oth->next != nullptr)
     {
-        other_values.push_back(tmp->data);
-        tmp = tmp->next;
-    }
-    // Insert values backwards so that the two lists have
-    // the same order
-    for(int i=other.size()-1; i >= 0; i--)
-    {
-        this->push_front(other_values.at(i));
+        // Advance other node
+        n_oth = n_oth->next;
+        // Create a new node that copies the data from the other node
+        Node* new_node = new Node();
+        new_node->data = n_oth->data;
+        // Mark new node as the next of our list
+        n_this->next = new_node;
+        // Advance our node
+        n_this = n_this->next;
+        this->size_++;
     }
 
 }
@@ -192,6 +203,7 @@ Forward_list<T>::Forward_list(std::initializer_list<T> input)
 {
     // Add the values in backwards so that the front node has the first
     // value from the initializer list
+    // todo : use iterators
     for (int i = input.size()-1; i >= 0; i--)
     {
         this->push_front(input.begin()[i]);
@@ -218,7 +230,6 @@ void Forward_list<T>::push_front(const T& data)
     // Update the front node and size
     this->head_ = new_node;
     this->size_++;
-
 }
 
 // Remove the front element of the list 
@@ -310,18 +321,14 @@ unsigned Forward_list<T>::size() const
 template <typename T>
 Forward_list<T> Forward_list<T>::split()
 {
-    this->display();
-    // Prepare an empty forward list named other
-    Forward_list<T> empty_list = Forward_list();
     // Minimum length for splitting must be 2
     if (this->size_ < 2)
-        return empty_list;
+        return Forward_list();
 
     // Traverse up until the halfway point
     Node* tmp = this->head_;
-    int idx = 0;
-    cout << "Length is " << this->size_;
-    cout << "\nMid idx is " << (this->size_ + 1) / 2 << endl;
+    // cout << "Length is " << this->size_;
+    // cout << "\nMid idx is " << (this->size_ + 1) / 2 << endl;
 
     int mid = 0;
     if (this->size_ % 2 == 0)
@@ -335,27 +342,16 @@ Forward_list<T> Forward_list<T>::split()
     }
     // At this point, tmp holds the final node of this
     // tmp->next will be the first node of other
-    // other.push_front
-    Node* tmp_other = tmp;
-    // Create a vector of the new values required for other
-    std::vector<T> other_values;
-    while (tmp_other->next != nullptr)
-    {
-        tmp_other = tmp_other->next;
-        other_values.push_back(tmp_other->data); // todo: somehow we are meant to not use push_back
-                                                 // ie, only rearrange some pointers. 
-    }
+
+    Forward_list<T> other = Forward_list();
+    other.head_ = tmp->next;
+    other.size_ = this->size_ / 2;
+
     // Update this list end value and size
     tmp->next = nullptr;
     this->size_ = (this->size_ + 1)/2;
 
-    this->display();
-
-    // Create the other list using the vector and return it
-    Forward_list<T> other = Forward_list(other_values);
-    other.display();
     return other;
-
 }   
 
 template <typename T>
@@ -379,106 +375,66 @@ void Forward_list<T>::swap_pointers(Node &a, Node &b)
 template <typename T>
 void Forward_list<T>::merge(Forward_list& other)
 {
-    // todo: merge is pretty broken atm
-    Node* it_this = this->head_;
-    Node* it_other = other.head_;
+    Node* this_node = this->head_;
+    Node* other_node = other.head_;
+    Node* this_prev = this->head_;
 
-    Node* tmp;
+    cout << "This : "; this->display();
+    cout << "Other : "; other.display();
 
-    cout << "this: ";    this->display();
-    cout << "other: ";other.display();
-
-    vector<T> merged_values;
-    while(true)
+    // Overwrite this head
+    if (other_node->data < this_node->data)
     {
-        // this list finished, copy other values
-        if (it_this == nullptr && it_other != nullptr)
+        cout << "overwrite head:: this: " << this_node->data << " other: " << other_node->data << endl;
+        cout << "this_node  " << this_node << "   this_node->next  " << this_node->next << endl;
+        this->head_ = other_node;
+        this_prev = other_node;
+        other_node = other_node->next;
+        cout << "head overwrite" << endl;
+    }
+
+    for (int i =0; i < 50; i++)
+    {
+        // check exit conditions ie any == nullptr
+        if (other_node == nullptr && this_node != nullptr)
         {
-            it_this->next = it_other;
-            break;
-            merged_values.push_back(it_other->data);
-            // it_other = it_other->next;
+            this_prev->next = this_node;
+            this_prev = this_node;
+            this_node = this_node->next;
+            cout << "other finished" << endl;
         }
-        // other list finished, copy this values
-        else if (it_this != nullptr && it_other == nullptr)
+        else if (other_node != nullptr && this_node == nullptr)
         {
-            break;
-            merged_values.push_back(it_this->data);
-            // it_this = it_this->next;
+            this_prev->next = other_node;
+            this_prev = other_node;
+            other_node = other_node->next;
+            cout << "other finished" << endl;
         }
-        // neither list finished
-        // grab the lowest value and increment appropriately
-        else if (it_this != nullptr && it_other != nullptr)
-        {
-            // cout << "this: " << it_this->data << " other: " << it_other->data << ", ";
-            if (it_this->data < it_other->data)
+        else if (other_node != nullptr && this_node != nullptr)
+            if (other_node->data < this_node->data )
             {
-                // cout << "this < other" << endl;
-                // merged_values.push_back(it_this->data);
-                tmp = it_this;
-                it_this = it_this->next;1
-                tmp->next = it_other;
+                // Swap the values
+                cout << "swap:: this: " << this_node->data << " other: " << other_node->data << endl;
+                cout << "this_node  " << this_node << "   this_node->next  " << this_node->next << endl;
+                this_prev->next = other_node;
+                this_prev = this_prev->next;
+                other_node = other_node->next;
             }
             else
             {
-                // cout << "this > other" << endl;
-                // merged_values.push_back(it_other->data);
-
-                tmp = it_this->next;
-                it_this->next = it_other;
-                it_this = tmp;
+                // Iterate this
+                cout << "no swap:: this: " << this_node->data << " other: " << other_node->data << endl;
+                cout << "this_node  " << this_node << "   this_node->next  " << this_node->next << endl;
+                this_prev->next = this_node;
+                this_prev = this_prev->next;
+                this_node = this_node->next;
 
             }
-            // this->display();
-        }
-        else
+        else // both null! finished iterating
+        {
             break;
-        // // this list finished, copy other values
-        // if (it_this == nullptr && it_other != nullptr)
-        // {
-        //     merged_values.push_back(it_other->data);
-        //     it_other = it_other->next;
-        // }
-        // // other list finished, copy this values
-        // else if (it_this != nullptr && it_other == nullptr)
-        // {
-        //     merged_values.push_back(it_this->data);
-        //     it_this = it_this->next;
-        // }
-        // // neither list finished
-        // // grab the lowest value and increment appropriately
-        // else if (it_this != nullptr && it_other != nullptr)
-        // {
-        //     if (it_this->data < it_other->data)
-        //     {
-        //         merged_values.push_back(it_this->data);
-        //         it_this = it_this->next;
-        //     }
-        //     else
-        //     {
-        //         merged_values.push_back(it_other->data);
-        //         it_other = it_other->next;
-        //     }
-        // }
-        // else
-        //     break;
+        }
     }
-    cout << "merged values : ";
-    for (auto v : merged_values)
-        cout << v << " ";
-    cout << endl;
-    this->display();
-    // // Create the new list from the vector of values
-    // if (merged_values.size() > 0)
-    // {
-    //     Forward_list<T>* merged_list = Forward_list(merged_values);
-    //     cout << "created merged_list success" << endl;
-    //     this->head_ = merged_list->head_;
-    //     this->size_ = merged_list->size_;
-
-    // }   
-    // cout << "displaying merged list";
-    // this->display();
 }   
 
 // recursive implementation of merge_sort
