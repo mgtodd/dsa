@@ -401,7 +401,7 @@ void Forward_list<T>::merge(Forward_list& other)
     Node* n_this = this->head_;
     Node* n_merged = nullptr;
 
-    //todo robust against nullptr
+    // robust against nullptr
     if (n_this == nullptr)
     {
         this->head_ = other.head_;
@@ -412,18 +412,18 @@ void Forward_list<T>::merge(Forward_list& other)
     }
     if (n_other == nullptr)
         return;
+
+    // Header select
     if (n_this->data > n_other->data)
     {
         n_merged = n_other; 
         n_other = n_other->next;
         this->size_++;
-
     }
     else
     {
         n_merged = n_this;
         n_this = n_this->next;
-
     }
     
     this->head_ = n_merged;
