@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <vector>
 using namespace std;
 template <typename T>
 class Forward_list
@@ -57,32 +56,23 @@ public:
     ~Forward_list();
 
     // Copy constructor
-    //*** For you to implement
     Forward_list(const Forward_list<T>& other);
 
     // Constructor from initializer list
-    //*** For you to implement
     Forward_list(std::initializer_list<T> input);
 
-    // Constructor from vector
-    Forward_list(std::vector<T> input);
-
     // Add an element to the front of the list
-    //*** For you to implement
     void push_front(const T& data);
 
     // Remove the first element of the list
-    //*** For you to implement
     void pop_front();
 
     // Return the data held in the first item of the list
     // This function should not change the list, which is 
     // why it is declared const
-    //*** For you to implement
     T front() const;
 
     // Print out all the data in the list in sequence
-    //*** For you to implement
     void display() const;
 
     // Outputs if the list is empty or not
@@ -98,12 +88,10 @@ public:
     // methods related to sorting     
 
     // merge two sorted lists, *this and other
-    //*** For you to implement
     void merge(Forward_list& other);
 
     // split *this into its first half, which becomes the new *this,
     // and its second half which is returned
-    //*** For you to implement
     Forward_list split();
 
     // The sort function uses the helper functions 
@@ -117,8 +105,8 @@ private:
     // You do not need to modify this function
     void merge_sort(Forward_list&);
 
-    void swap_pointers(Node &a, Node &b);
-
+    // display helpful information about a node
+    // used for debugging
     void displayNode(Node* n);
 
 };
@@ -147,7 +135,6 @@ Forward_list<T>::~Forward_list()
 }
 
 // Copy constructor
-// ***For you to implement
 
 // The copy constructor takes as argument a const reference to a 
 // another Forward_list "other" 
@@ -187,7 +174,6 @@ Forward_list<T>::Forward_list(const Forward_list& other)
 }
 
 // Constructor from initializer list
-// ***For you to implement
 
 // This implements the functionality you see with, for example, 
 // std::forward_list<int> my_list = {1,2,3}
@@ -197,33 +183,19 @@ Forward_list<T>::Forward_list(const Forward_list& other)
 // see this is the argument to this constructor (with data of type T
 // rather than just int). 
 
-// You can access the elements of a std::initializer_list via an iterator
-// for example you can cycle through all the elements with
-// for(auto it = input.begin(); it!= input.end(); ++it){Do something with *it} 
 template <typename T>
 Forward_list<T>::Forward_list(std::initializer_list<T> input)
 {
     // Add the values in backwards so that the front node has the first
     // value from the initializer list
-    // todo : use iterators
     for (int i = input.size()-1; i >= 0; i--)
     {
         this->push_front(input.begin()[i]);
     }
 }
 
-template<typename T>
-Forward_list<T>::Forward_list(std::vector<T> input)
-{
-    for (int i = input.size()-1; i>=0; i--)
-    {
-        this->push_front(input.at(i));
-    }
-}
-
 
 // Add element to front of list
-// ***For you to implement
 template <typename T>
 void Forward_list<T>::push_front(const T& data)
 {
@@ -236,7 +208,6 @@ void Forward_list<T>::push_front(const T& data)
 
 // Remove the front element of the list 
 // If the list is empty don't do anything
-// ***For you to implement
 template <typename T>
 void Forward_list<T>::pop_front()
 {
@@ -255,7 +226,6 @@ void Forward_list<T>::pop_front()
 // Return the data in the front element of the list
 // If the list is empty the behaviour is undefined:
 // you can return an arbitrary value, but don't segfault 
-// ***For you to implement
 template <typename T>
 T Forward_list<T>::front() const
 {
@@ -269,7 +239,6 @@ T Forward_list<T>::front() const
 }
 
 // Print out the list
-// ***For you to implement
 template <typename T>
 void Forward_list<T>::display() const
 {
@@ -320,7 +289,6 @@ unsigned Forward_list<T>::size() const
 // Don't forget to update the size_ variable of this and other
 // You do not need to create any new nodes for this function,
 // just change pointers.
-// ***For you to implement
 template <typename T>
 Forward_list<T> Forward_list<T>::split()
 {
@@ -330,8 +298,6 @@ Forward_list<T> Forward_list<T>::split()
 
     // Traverse up until the halfway point
     Node* tmp = this->head_;
-    // cout << "Length is " << this->size_;
-    // cout << "\nMid idx is " << (this->size_ + 1) / 2 << endl;
 
     int mid = 0;
     if (this->size_ % 2 == 0)
@@ -357,21 +323,8 @@ Forward_list<T> Forward_list<T>::split()
     return other;
 }   
 
-template <typename T>
-void Forward_list<T>::swap_pointers(Node &a, Node &b)
-{
-    Node c = a;
-    a = b;
-    b = c;
-}
-
-// // Make the order a -> b -> c
-// function set_node_order(Node* &a, Node* &b, Node* &c)
-// {
-//     // 
-//     a->next = b;
-//     b->next = c;
-// }
+// Display information about a node
+// Useful function for debugging
 template <typename T>
 void Forward_list<T>::displayNode(Node* n)
 {
@@ -387,15 +340,9 @@ void Forward_list<T>::displayNode(Node* n)
 // You do not need to create any new nodes in this function,
 // just update pointers.  
 // Set other to be an empty list at the end of the function
-//***For you to implement
 template <typename T>
 void Forward_list<T>::merge(Forward_list& other)
 {
-
-    cout << "this  list pre merge: ";
-    this->display();
-    cout << "other list pre merge: ";
-    other.display();
 
     Node* n_other = other.head_;
     Node* n_this = this->head_;
@@ -430,12 +377,7 @@ void Forward_list<T>::merge(Forward_list& other)
 
     // Now traverse
     while(1)
-    // for (int i=0; i<50; i++)
     {
-        // cout<< "n_this   -- "; displayNode(n_this);
-        // cout<< "n_other  -- "; displayNode(n_other);
-        // cout<< "n_merged -- "; displayNode(n_merged);
-        // cout << endl;
         // If this list is depleted
         if (n_this == nullptr && n_other != nullptr)
         {
@@ -475,7 +417,6 @@ void Forward_list<T>::merge(Forward_list& other)
         // Always advance n_merged
         n_merged = n_merged->next;
     }
-
     // Kill the other list
     other.head_ = nullptr;
     other.size_ = 0;
