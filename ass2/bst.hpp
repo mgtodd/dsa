@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
 
 template <typename T>
 class BST
@@ -190,14 +191,14 @@ void BST<T>::fix_height(Node* n)
     {
         int l_height = -1;
         int r_height = -1;
-        if (*current_node->left != nullptr))
+        if (current_node->left != nullptr)
             l_height = current_node->left->height;
 
-        if (*current_node->right != nullptr))
+        if (current_node->right != nullptr)
             r_height = current_node->right->height;
 
         // This nodes height is the greater of the l&r subtree heights +1
-        int current_node->height = std::max(l_height, r_height) + 1;
+        current_node->height = std::max(l_height, r_height) + 1;
         // Continue advancing up the tree and correcting their heights also
         current_node = current_node->parent;
 
@@ -219,7 +220,8 @@ void BST<T>::insert(T k)
     // node will iterate down through the tree starting from the root
     // Node* node = root_;
     // prev_node will hold node's parent
-    Node* prev_node = node;
+    Node* node = root_;
+    Node* prev_node = prev_node;
     bool went_right;
     int node_height = 0;
 
@@ -355,11 +357,11 @@ void BST<T>::erase(T k)
 
     Node* r = n->right;
     Node* l = n->left;
-    Node* replacement == nullptr; // default case is n has no children
+    Node* replacement = nullptr; // default case is n has no children
     // Case 1: n has only left child
     if (r == nullptr && l != nullptr)
     {
-        replacement = l
+        replacement = l;
     }
     // Case 2: n has only left child
     else if (r != nullptr && l == nullptr)
@@ -368,7 +370,7 @@ void BST<T>::erase(T k)
     }
     else if (r != nullptr && l != nullptr)
     {
-        replacement = successor(n);
+        replacement = successor(k);
     }
 
     // Which leg should the replacement go to?
@@ -387,7 +389,7 @@ void BST<T>::erase(T k)
     }
     
     delete n;
-    size--;
+    size_--;
     fix_height(replacement);
 
     // Once pointers have been correctly adjusted then don't forget to:
