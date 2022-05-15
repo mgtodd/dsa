@@ -130,7 +130,7 @@ private:
     // correct heights and then walks up the tree from node to the root 
     // correcting the heights.
     // You can imlement this, or correct the heights another way
-    //void fix_height(Node* node);
+    void fix_height(Node* n);
 
     // The rest of these functions are already implemented
 
@@ -181,6 +181,30 @@ void BST<T>::delete_subtree(Node* node)
     delete node;
 }
 
+template <typename T>
+void BST<T>::fix_height(Node* n)
+{
+    // This function assumes that the subtrees of n have correct heights already
+    Node* current_node = n;
+    while (current_node != nullptr)
+    {
+        int l_height = -1;
+        int r_height = -1;
+        if (*current_node->left != nullptr))
+            l_height = current_node->left->height;
+
+        if (*current_node->right != nullptr))
+            r_height = current_node->right->height;
+
+        // This nodes height is the greater of the l&r subtree heights +1
+        int current_node->height = std::max(l_height, r_height) + 1;
+        // Continue advancing up the tree and correcting their heights also
+        current_node = current_node->parent;
+
+    }
+}
+
+
 //*** For you to implement
 template <typename T>
 void BST<T>::insert(T k)
@@ -191,12 +215,13 @@ void BST<T>::insert(T k)
     // Also remember to correct the heights on the path from the newly
     // inserted node to the root.
     // fix_height(start_fix);
-/*
+
     // node will iterate down through the tree starting from the root
-    Node* node = root_;
+    // Node* node = root_;
     // prev_node will hold node's parent
     Node* prev_node = node;
     bool went_right;
+    int node_height = 0;
 
     if(node == nullptr)
     {
@@ -207,6 +232,7 @@ void BST<T>::insert(T k)
     while(node != nullptr)
     {
         prev_node = node;
+        node_height++;
         if(k < node->key)
         {
             node = node->left;
@@ -227,43 +253,83 @@ void BST<T>::insert(T k)
     if(went_right)
     {
         prev_node->right= new Node(k, prev_node);
+        node = prev_node->right;
     }
     else
     {
         prev_node->left= new Node(k, prev_node);
+        node = prev_node->left;
     }
+    fix_height(node);
     ++size_;
-    */
+    
 }
 
 //*** For you to implement
 template <typename T>
 typename BST<T>::Node* BST<T>::successor(T k)
 {
-    // There are two cases here.  
-    // If the node containing k has a right child, then 
-    // the successor will be the minimum node in its right subtree
-    // Otherwise, the successor will be the first node with a key 
-    // bigger than k on the path from the node with key k to the root.
-    // In other words, it is the node where we last took a left turn when 
-    // searching for the key k.
+    // Begin by locating the node that holds key k
+    Node* current_node = find(k);
+    if (current_node == nullptr) 
+        return nullptr; // Node not found
 
-    // dummy return value so compiler does not complain
-    return root_;
+    // Case 1: current_node has a right child
+    //         locate the minimum node in the right subtree of current_node
+    if (current_node->right != nullptr)
+    {
+        return min(current_node->right);
+    }
+    else
+    // Case 2: current_node has no right child.
+    //         traverse upwards until we find a key larger than k
+    {
+        while(current_node != nullptr)
+        {
+            if (current_node->key > k)
+                return current_node; // found a key greater than k
+            else
+                current_node = current_node->parent; // keep searching
+        }
+    }
+    // If we get here then we never found a key larger than k
+    return nullptr;
+
 }
 
 //*** For you to implement
 template <typename T>
 void BST<T>::delete_min()
 {
-
     // if tree is empty just return.
-    //Node* min_node = min();
-    // Now update pointers to remove min_node from the tree
+    Node* min_node = min();
+    if (min_node == nullptr)
+        return;
+    Node* parent = min_node->parent;
+    Node* child = min_node->right;
 
-    //delete min_node;
-    //--size_;
-    //fix_height(start_fix);
+    // If the parent of min_node is null then this is the root_
+    if (parent == nullptr)
+    {
+        // If min_node has a valid right child, make this root
+        if (child != nullptr)
+        {
+            child->parent = nullptr;
+        }
+        this->root_ = child;
+        fix_height(root_);
+    }
+    else
+    // Move the right subtree of min_node beneath min_node's parent
+    {
+        parent->left = child;
+        if (child != nullptr)
+            child->parent = parent;
+        fix_height(parent);
+    }
+    // Delete min, update size
+    delete min_node;
+    --size_;
 }
 
 //*** For you to implement
@@ -273,6 +339,9 @@ void BST<T>::erase(T k)
     // Step 1: locate node holding key k
     // simply return if k is not in tree
     // let node_to_remove be a pointer to the node to be removed
+    Node* n = find(k);
+    if (n == nullptr)
+        return;
 
     // Step 2: find a node, replacement, to replace node_to_remove
     // We break this down into 3 cases
@@ -282,7 +351,45 @@ void BST<T>::erase(T k)
     // in this case replacement is successor of node_to_remove
     // There is a further instance of Case 3 that needs special handling.
     // This is where replacement is the right child of node_to_remove.
-   
+
+
+    Node* r = n->right;
+    Node* l = n->left;
+    Node* replacement == nullptr; // default case is n has no children
+    // Case 1: n has only left child
+    if (r == nullptr && l != nullptr)
+    {
+        replacement = l
+    }
+    // Case 2: n has only left child
+    else if (r != nullptr && l == nullptr)
+    {
+        replacement = r;
+    }
+    else if (r != nullptr && l != nullptr)
+    {
+        replacement = successor(n);
+    }
+
+    // Which leg should the replacement go to?
+    Node* parent = n->parent;
+    if (parent->key > k)
+    {
+        // put replacement on the left side
+        parent->left = replacement;
+        replacement->parent = parent;
+    }
+    else
+    {
+        // put replacement on the right side
+        parent->right = replacement;
+        replacement->parent = parent;
+    }
+    
+    delete n;
+    size--;
+    fix_height(replacement);
+
     // Once pointers have been correctly adjusted then don't forget to:
     // delete node_to_remove;
     // --size_;
