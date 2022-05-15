@@ -370,33 +370,50 @@ void BST<T>::erase(T k)
     }
     else if (r != nullptr && l != nullptr)
     {
+        // In this case, we don't actually delete this node,
+        // instead we update it with the key of its successor and 
+        // delete the successor node
         replacement = successor(k);
+        int new_key = replacement->key;
+        erase(new_key);
+        n->key = new_key;
+        fix_height(n);
+        return;
     }
+
+    // OK so the issue here is that you arent deleting the pointers in the case
+    // of leaf node deletions.
+
 
     // Which leg should the replacement go to?
     Node* parent = n->parent;
-    if (parent->key > k)
+    std::cout << "n: "; print(n);
+    std::cout << "replacement: "; print(replacement);
+    std::cout << "parent: "; print(parent);
+    if (parent == nullptr)
     {
-        // put replacement on the left side
-        parent->left = replacement;
-        replacement->parent = parent;
+        // n is actually the root node
+        root_ = replacement;
+        replacement->parent = nullptr;
     }
     else
     {
-        // put replacement on the right side
-        parent->right = replacement;
-        replacement->parent = parent;
+        if (parent->key > k)
+        {
+            // put replacement on the left side
+            parent->left = replacement;
+            replacement->parent = parent;
+        }
+        else
+        {
+            // put replacement on the right side
+            parent->right = replacement;
+            replacement->parent = parent;
+        }
     }
-    
     delete n;
     size_--;
     fix_height(replacement);
-
-    // Once pointers have been correctly adjusted then don't forget to:
-    // delete node_to_remove;
-    // --size_;
-    // fix the heights from the bottom-most node affected by the changes
-    //fix_height(start_fix);
 }
 
 //*** For you to implement
