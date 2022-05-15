@@ -220,7 +220,7 @@ void BST<T>::insert(T k)
     // Node* node = root_;
     // prev_node will hold node's parent
     Node* node = root_;
-    Node* prev_node = prev_node;
+    Node* prev_node = node;
     bool went_right;
     int node_height = 0;
 
@@ -369,15 +369,6 @@ void BST<T>::erase(T k)
         fix_height(n);
         return;
     }
-    else
-    {
-        // if (parent == nullptr)
-        // {
-        //     root_ = nullptr;
-        //     size_ = 0;
-        //     return;
-        // }
-    }
 
     // Decide what to update
     if (replacement == nullptr)
@@ -418,7 +409,7 @@ void BST<T>::erase(T k)
     // Delete the node, update size and height
     delete n;
     size_--;
-    fix_height(replacement);
+    fix_height(parent);
 }
 
 //*** For you to implement
