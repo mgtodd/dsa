@@ -201,7 +201,6 @@ void BST<T>::fix_height(Node* n)
         current_node->height = std::max(l_height, r_height) + 1;
         // Continue advancing up the tree and correcting their heights also
         current_node = current_node->parent;
-
     }
 }
 
@@ -338,26 +337,15 @@ void BST<T>::delete_min()
 template <typename T>
 void BST<T>::erase(T k)
 {
-    // Step 1: locate node holding key k
-    // simply return if k is not in tree
-    // let node_to_remove be a pointer to the node to be removed
+    // locate node holding key k
     Node* n = find(k);
     if (n == nullptr)
         return;
-
-    // Step 2: find a node, replacement, to replace node_to_remove
-    // We break this down into 3 cases
-    // Case 1: node_to_remove has no right child 
-    // Case 2: node_to_remove has no left child 
-    // Case 3: node_to_remove has both children
-    // in this case replacement is successor of node_to_remove
-    // There is a further instance of Case 3 that needs special handling.
-    // This is where replacement is the right child of node_to_remove.
-
-
+    
     Node* r = n->right;
     Node* l = n->left;
     Node* replacement = nullptr; // default case is n has no children
+    Node* parent = n->parent;
     // Case 1: n has only left child
     if (r == nullptr && l != nullptr)
     {
@@ -368,6 +356,7 @@ void BST<T>::erase(T k)
     {
         replacement = r;
     }
+    // Case 3: n has left and right children
     else if (r != nullptr && l != nullptr)
     {
         // In this case, we don't actually delete this node,
@@ -380,37 +369,53 @@ void BST<T>::erase(T k)
         fix_height(n);
         return;
     }
-
-    // OK so the issue here is that you arent deleting the pointers in the case
-    // of leaf node deletions.
-
-
-    // Which leg should the replacement go to?
-    Node* parent = n->parent;
-    std::cout << "n: "; print(n);
-    std::cout << "replacement: "; print(replacement);
-    std::cout << "parent: "; print(parent);
-    if (parent == nullptr)
+    else
     {
-        // n is actually the root node
-        root_ = replacement;
-        replacement->parent = nullptr;
+        // if (parent == nullptr)
+        // {
+        //     root_ = nullptr;
+        //     size_ = 0;
+        //     return;
+        // }
+    }
+
+    // Decide what to update
+    if (replacement == nullptr)
+    {
+        // If n is a leaf node, replacement is null
+        // update parent appropriately
+        if (parent->key > n->key)
+            parent->left = nullptr;
+        else
+            parent->right = nullptr;
     }
     else
     {
-        if (parent->key > k)
+        // n is not a leaf node
+        // Update the parent node and also the replacement node pointers
+        if (parent == nullptr)
         {
-            // put replacement on the left side
-            parent->left = replacement;
-            replacement->parent = parent;
+            // n is actually the root node
+            root_ = replacement;
+            replacement->parent = nullptr;
         }
         else
         {
-            // put replacement on the right side
-            parent->right = replacement;
-            replacement->parent = parent;
+            if (parent->key > k)
+            {
+                // put replacement on the left side
+                parent->left = replacement;
+                replacement->parent = parent;
+            }
+            else
+            {
+                // put replacement on the right side
+                parent->right = replacement;
+                replacement->parent = parent;
+            }
         }
     }
+    // Delete the node, update size and height
     delete n;
     size_--;
     fix_height(replacement);
@@ -429,8 +434,28 @@ void BST<T>::rotate_right(Node* node)
     // 2) node's original parent becomes move_up_node's parent
     // 3) move_up_node's right child becomes node
 
-    // Correct height of ancestors of node 
-    // fix_height(node);
+    Node* move_up_node = node->left;
+    Node* parent = node->parent;
+
+    // Binary tree right rotate
+    node->left = move_up_node->right;
+    move_up_node->right = node;
+
+    // Update the parent of node 
+    node->parent = move_up_node;
+    move_up_node->parent = parent;
+
+    // handle node's original parent linkages
+    if (parent == nullptr)
+        root_ = move_up_node;
+    else if (parent->key > move_up_node->key)
+        parent->left = move_up_node;
+    else
+        parent->right = move_up_node;
+    
+    fix_height(node);
+
+
 }
 
 // The rest of the functions below are already implemented
